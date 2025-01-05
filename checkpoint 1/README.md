@@ -1,40 +1,41 @@
 # Fake Review Detection Project
 
-This project aims to detect fake reviews using natural language processing (NLP) techniques and machine learning algorithms.
+This project aims to detect fake reviews using natural language processing (NLP) techniques and machine learning algorithms. It is part of the **Winter of Code (DA-IICT)** initiative.
 
-## Preprocessing Steps
+---
 
-### 1. Import Libraries
+## 🚀 **Project Overview**
 
- Importing libraries such as pandas, nltk, and sklearn.
+Online reviews influence consumer decisions, but fake reviews undermine their trustworthiness. This project addresses the issue by:
+- Preprocessing review datasets to prepare them for analysis.
+- Applying machine learning models to identify fraudulent reviews.
+- Evaluating performance metrics to ensure reliability.
 
-### 2. Load Dataset
+---
 
- Load the dataset from the fakeReviewData file.
+## 🏗️ **Preprocessing Steps**
 
-### 3. Text Cleaning
+### 1. **Import Libraries**
+   Import essential libraries such as:
+   - `pandas`: For data manipulation.
+   - `nltk`: For text preprocessing.
+   - `scikit-learn`: For machine learning algorithms.
 
- Remove digits, punctuation, and extra spaces from the text.
+### 2. **Load Dataset**
+   Load the dataset from the `fakeReviewData.csv` file.
 
-### 4. Remove Stopwords
+### 3. **Text Cleaning**
+   Perform the following:
+   - Remove digits, punctuation, and extra spaces.
+   - Standardize text formatting.
 
- Remove common stopwords from the text.
+### 4. **Remove Stopwords**
+   Eliminate common stopwords using the `nltk.corpus` module.
 
-### 5. Lemmatization
+### 5. **Lemmatization**
+   Convert words to their base forms using the `WordNetLemmatizer`.
 
- Lemmatize words to their base form.
+### 6. **Vectorization**
+   Transform cleaned text into numerical features using **TF-IDF vectorization** to prepare data for machine learning models.
 
-### 6. Vectorization
-
- Convert text data into numerical data using TF-IDF vectorization.
-
-## Requirements
-
-- Python 3.11.2
-- pandas
-- nltk
-- scikit-learn
-
-## Acknowledgements
-
-This project uses the NLTK library for natural language processing and scikit-learn for machine learning.
+---
