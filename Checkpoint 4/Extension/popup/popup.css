@@ -1,0 +1,107 @@
+body {
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    background-color: #f4f4f4;
+    padding: 15px;
+    width: 280px; /* Slightly wider popup */
+  }
+  
+  .popup-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  h1 {
+    color: #2c3e50; /* Darker heading color */
+    font-size: 1.5em;
+    margin-bottom: 15px;
+    text-align: center; /* Center the heading */
+  }
+  
+  .setting-item {
+    margin-bottom: 15px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+  
+  input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+  }
+  
+  .button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .primary-button {
+    background-color: #5cb85c; /* Green save button */
+    color: white;
+  }
+  
+  .primary-button:hover {
+    background-color: #4cae4c;
+  }
+  
+  .analysis-summary {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: white; /* White background for summary box */
+    border: 1px solid #eee;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Subtle shadow */
+  }
+  
+  .analysis-summary h2 {
+    font-size: 1.2em;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #3498db; /* Blue heading for summary */
+  }
+  
+  .analysis-summary p {
+    font-size: 1em;
+    margin: 0;
+  }
+  
+  .analysis-summary #fakeReviewCount {
+    font-weight: bold;
+    color: #e74c3c; /* Red color for fake review count */
+  }
+
+  /* ... (previous CSS styles in popup.css) ... */
+
+.fake-review-label, .real-review-label, .null-value-tag {
+    font-size: 0.9em; /* Adjust font size as needed */
+    font-style: italic; /* Italic style for labels */
+    margin-left: 5px; /* Reduced margin from previous */
+    padding: 2px 5px; /* Add padding for better visual separation */
+    border-radius: 3px; /* Rounded corners for labels */
+  }
+  
+  .fake-review-label {
+    color: white;
+    background-color: red;
+  }
+  
+  .real-review-label {
+    color: white;
+    background-color: green;
+  }
+  
+  .null-value-tag {
+    color: black; /* Or a darker color */
+    background-color: orange;
+  }
