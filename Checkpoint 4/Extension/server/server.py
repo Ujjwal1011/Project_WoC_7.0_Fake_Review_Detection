@@ -1,17 +1,83 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import random
+import numpy as np
+import pandas as pd
+import string
 import spacy
 import joblib  # or pickle
-import pandas as pd  # For creating a DataFrame
-import numpy as np
-from gensim.models import Word2Vec
-from sklearn.base import BaseEstimator, TransformerMixin
+import nltk
+import pickle
 
+from autocorrect import Speller
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from sklearn.base import BaseEstimator, TransformerMixin
+from gensim.models import Word2Vec
+import emoji
+import re
 
 # Load the spaCy model outside the route function
-nlp_en = spacy.load("en_core_web_sm")
+try:
+    nlp_en = spacy.load("en_core_web_sm")
+    print("spaCy model loaded successfully.")
+except Exception as e:
+    print(f"Error loading spaCy model: {e}")
+    nlp_en = None  # Handle the case where the model fails to load
 
+class SpellingCorrectionTransformer(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        self.lemmatizer = WordNetLemmatizer()
+        self.spell=Speller(lang='en')
+        return X.apply(self._preprocess_text)
+
+    def _preprocess_text(self, text):
+        # Correct Spelling: correct the whole text first
+        words = text.split()
+        
+        corrected_words = [self.spell(word) for word in words]
+        text = " ".join(corrected_words)
+
+        # Convert emojis to text
+        text = emoji.demojize(text, delimiters=("", ""))
+
+        # Handle contractions
+        text = re.sub(r"can't", "can not", text)
+        text = re.sub(r"won't", "will not", text)
+        text = re.sub(r"n't", " not", text)
+        text = re.sub(r"'m", " am", text)
+        text = re.sub(r"'s", " is", text)
+        text = re.sub(r"'re", " are", text)
+        text = re.sub(r"'ve", " have", text)
+        text = re.sub(r"'d", " would", text)
+        text = re.sub(r"'ll", " will", text)
+
+        # Remove URLs and email addresses
+        text = re.sub(r"http\S+|www\S+|https\S+", "", text)
+        text = re.sub(r"\S*@\S*\s?", "", text)
+
+        # Remove special characters
+        text = re.sub(r"[^a-zA-Z0-9\s]", "", text)
+
+        # Remove digits and lowercase
+        text = "".join([char.lower() for char in text if not char.isdigit()])
+
+        # Remove punctuation
+        text = text.translate(str.maketrans('', '', string.punctuation))
+
+        # Tokenize
+        words = word_tokenize(text)
+
+        # Lemmatize
+        words = [self.lemmatizer.lemmatize(word) for word in words]
+
+        # Remove multiple spaces
+        text = re.sub(r"\s+", " ", " ".join(words)).strip()
+
+        # Rejoin words into a single string
+        return text
 
 
 class Word2VecTransformer(BaseEstimator, TransformerMixin):
@@ -36,15 +102,18 @@ class Word2VecTransformer(BaseEstimator, TransformerMixin):
                 vectors.append(np.zeros(self.vector_size))  # Return a zero vector if no words are found
         return np.array(vectors, dtype=np.float32)  # Ensure output is of type float32)
 
-#Load model before app to make model global
-# Load the model outside the route function
+
 try:
-    model = joblib.load('model.pkl')  # Replace with your actual model file
+    with open('C:\\Users\\ujjwa_n18433z\\Desktop\\ujjwal\\All Projects\\Project_WoC_7.0_Fake_Review_Detection\\Checkpoint 4\\Extension\\server\\model.pkl', 'rb') as file:
+        model = joblib.load(file)
+    # model = joblib.load('best_model.pkl')  # Replace with your actual model file
     print("Model loaded successfully.")
 except FileNotFoundError:
     print("Error: Model file not found.")
     model = None
 except Exception as e:
+    print(e)
+    print(f"Error loading model: {type(e).__name__} - {str(e)}")
     print(f"Error loading model: {e}")
     model = None
 
@@ -52,7 +121,10 @@ except Exception as e:
 app = Flask(__name__)
 CORS(app)  # Enable Cross-Origin Resource Sharing
 
-def is_english_spacy(text, nlp=nlp_en, threshold=0.7):
+def is_english_spacy(text, nlp, threshold=0.7):
+    if nlp is None:
+        print("spaCy model is not loaded, skipping language detection.")
+        return True  # Assume English if spaCy model failed to load
     doc = nlp(text)
     english_tokens = [token for token in doc if token.has_vector or not token.is_oov]
     num_english_tokens = len(english_tokens)
@@ -67,15 +139,19 @@ def is_english_spacy(text, nlp=nlp_en, threshold=0.7):
 def analyze_review():
     data = request.get_json()
     review_text = data.get('review', '')
-    rating = data.get('rating', None)
+    rating = float(data.get('rating', None))
     category = data.get('category', None)
+    if category is not None:
+        category=re.sub(r"\s+", "_", category)
+    else:
+        category = "" 
 
     print("Server received request body:", data)
     print("Server received review for analysis:", review_text, "Rating:", rating, "Category:", category)
 
     is_non_english = False
     try:
-        language_prediction = is_english_spacy(review_text)
+        language_prediction = is_english_spacy(review_text, nlp_en)
         if language_prediction is not None and language_prediction == False: # Inverted the condition
             is_non_english = True
             print("Detected language: Non-English")  # Log when non-English is detected
@@ -95,7 +171,7 @@ def analyze_review():
             'text_': [review_text],  # Name should match what your model was trained on
             'rating': [rating]
         })
-
+        print("Input data:", input_data)
         # 2. Make the prediction
         prediction = model.predict(input_data)
         print("Prediction output", prediction)
